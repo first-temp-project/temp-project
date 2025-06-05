@@ -1,0 +1,129 @@
+@charset "UTF-8";
+
+* {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	text-decoration: none;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: 'Noto Sans KR', serif;
+	font-optical-sizing: auto;
+	font-weight: 400;
+	font-style: normal;
+	height: 100vh; /* 화면 전체 높이를 사용 */
+	display: flex;
+	flex-direction: column; /* 세로 방향 레이아웃 */
+}
+
+.main {
+	flex: 1 1 auto;
+}
+
+a {
+	color: #000;
+}
+
+.header {
+	border-bottom: 1px solid rgb(235, 235, 235);
+	display: flex;
+	height: 80px;
+}
+
+.header>h1 {
+	width: 20%;
+	text-align: center;
+	line-height: 70px;
+	color: blue;
+	cursor: pointer;
+}
+
+.header>h1:hover {
+	color: red;
+}
+
+.header>nav {
+	width: 80%;
+	font-size: 15px;
+}
+
+.header>nav>ul {
+	display: flex;
+	justify-content: right;
+	align-items: center;
+	height: 70px;
+	padding-right: 60px;
+}
+
+.header>nav>ul>li, .header>nav>ul>li a {
+	position: relative;
+	display: block;
+	width: 100px;
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
+	color: rgb(100, 100, 100);
+	padding: 0 5px;
+}
+
+.header>nav>ul>li a:hover {
+	background-color: rgb(240, 240, 240);
+	font-weight: bold;
+}
+
+ul.submenu {
+	position: absolute;
+	overflow: hidden;
+	transition: all 0.7s;
+	visibility: hidden;
+}
+/* header-------------------------------*/
+footer {
+	height: 80px;
+	border-top: 1px solid #ccc;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: flex;
+}
+
+footer>h2 {
+	width: 20%;
+	text-align: center;
+	line-height: 70px;
+}
+
+footer>h2:hover {
+	color: blue;
+}
+
+footer>nav {
+	width: 80%;
+}
+
+footer>nav>ul {
+	display: flex;
+	height: 70px;
+	align-items: center;
+	justify-content: right;
+	padding-right: 50px;
+}
+
+footer>nav>ul>li>a {
+	display: block;
+	height: 40px;
+	text-align: center;
+	line-height: 40px;
+	font-size: 15px;
+	margin-right: 30px;
+	font-weight: bold;
+	color: #000;
+}
+/* footer------------------------ */
+
+/* div.joinInputDiv>input.cancelChangePwBtn, div.joinInputDiv>input.changePwOkbtn
+	{
+	display: none;
+} */
+
+
