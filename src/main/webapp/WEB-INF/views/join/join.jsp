@@ -74,8 +74,6 @@
 
 <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 <script>
-  const $passwordInput = $("input[name=userPassword]");
-  const $confirmPasswordInput = $("input[name=userPasswordCheck]");
   let msg = '${msg}';
   if (msg) {alert(msg);}
   let contextPath = '${pageContext.request.contextPath}';
@@ -83,5 +81,5 @@
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script src="<c:url value='/static/js/join.js' />"></script>
+<script type="module"src="<c:url value='/static/js/join.js' />"></script>
 </html>

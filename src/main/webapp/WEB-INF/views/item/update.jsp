@@ -13,7 +13,6 @@
 	<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet" />
 	<link rel="stylesheet" href="<c:url value='/static/css/style.css' />" />
 	<link rel="stylesheet" href="<c:url value='/static/css/product-register.css' />" />
-	<link rel="stylesheet" href="<c:url value='/static/css/product-update.css' />" />
 </head>
 <body>
 	<jsp:include page="/WEB-INF/views/layout/header.jsp"/>
@@ -21,11 +20,12 @@
 		<div class="container">
 			<h1 class="product-header">상품 등록</h1>
 			<form id="productForm" name="productForm" method="post" enctype="multipart/form-data">
-			<input type="hidden" name="itemUuid" value="${item.itemUuid}" />
+			<input type="hidden" name="itemThumbnailPath" value="${item.itemThumbnailPath}" />
+			<input type="hidden" name="itemNum" value="${item.itemNum}" />
 				<div>
 					<label for="thumbnail">대표이미지</label>
-					<input type="file" id="thumbnail" name="multipartFile" accept="image/*" required />
-					<img id="thumbnailPreview" class="thumbnail-preview" src="" style="display:block;" alt="미리보기" />
+					<input type="file" id="thumbnail" name="multipartFile" accept="image/*" value="${item.itemName}" required />
+					<img id="thumbnailPreview" class="thumbnail-preview" src="<c:url value='/upload/item/${item.itemThumbnailPath}' />" style="display:block;" alt="미리보기" />
 				</div>
 	
 				<div>
@@ -46,15 +46,15 @@
 				<div>
 					<label for="category">카테고리</label>
 					<select id="category" name="itemCategory" required>
-						<option value="">카테고리 선택</option>
-						<option value="중앙경제평론사">중앙경제평론사</option>
-						<option value="중앙생활사">중앙생활사</option>
-						<option value="중앙에듀북스" >중앙에듀북스</option>
+						<option value="" ${empty item.itemCategory ? 'selected' : ''}>카테고리 선택</option>
+						<option value="중앙경제평론사" ${item.itemCategory == '중앙경제평론사'? 'selected' : ''}>중앙경제평론사</option>
+						<option value="중앙생활사" ${item.itemCategory == '중앙생활사' ? 'selected' : ''}>중앙생활사</option>
+						<option value="중앙에듀북스" ${item.itemCategory == '중앙에듀북스' ? 'selected' : ''}>중앙에듀북스</option>
 					</select>
 				</div>
 	
-				<button class="product-cancel-btn" type="button" onclick="history.back()">취소하기</button>
-				<button type="submit" class="product-update-btn">등록하기</button>
+				<button class="product-cancel-btn" type="button" data-url="<c:url value='/item/list${criteria.params}' />">취소하기</button>
+				<button type="submit" class="product-update-btn" data-update="update">등록하기</button>
 			</form>
 		</div>
 	</main>
@@ -69,5 +69,4 @@
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>
 <script src="<c:url value='/static/js/product-register.js' />"></script>
-<script src="<c:url value='/static/js/product-update.js' />"></script>
 </html>

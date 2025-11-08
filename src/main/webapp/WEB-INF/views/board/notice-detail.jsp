@@ -22,7 +22,7 @@
             <div class="header-with-buttons">
                 <h1 class="title"><c:out value="${board.boardTitle}" /></h1>
                 <div class="btn-group">
-                    <a href="<c:url value='/board/list${criteria.params}&referrer=${criteria.referrer}' />" class="btn"><i class="fa fa-bars"></i> 목록</a>
+                    <a href="<c:url value='/board/list${criteria.params}' />" class="btn"><i class="fa fa-bars"></i> 목록</a>
                     <a href="<c:url value='/board/update${criteria.params}&boardNum=${board.boardNum}' />" class="btn"><i class="fa fa-pencil"></i> 수정</a>
                     <a href="<c:url value='/board/delete${criteria.params}&boardNum=${board.boardNum}' />" class="btn deleteBoardBtn"><i class="fa fa-trash"></i> 삭제</a>
                 </div>
@@ -34,28 +34,43 @@
                 <span class="post-info-span">조회수: <c:out value="${board.boardReadCount}" /></span>
                 <span class="post-info-span">댓글: <c:out value="${board.boardCommentCount}" /></span>
             </div>
-
-            <div class="img-box">
-                <c:forEach var="file" items="${files}">
-                    <img src="<c:url value='/upload/download/${file.fileUploadPath}/${file.fileUuid}_${file.fileName}' />" alt="${file.fileName}" />
-                </c:forEach>
-            </div>
-			<c:if test="${not empty board.boardVideoId}">
-	            <div class="video-content">
-	                <iframe src="https://www.youtube.com/embed/${board.boardVideoId}"
-	                        title="YouTube video player"
-	                        frameborder="0"
-	                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-	                        referrerpolicy="strict-origin-when-cross-origin"
-	                        allowfullscreen>
-	                </iframe>
-	            </div>
-            </c:if>
+      
+	
 
             <article class="post-content">
+            	<c:if test="board.category eq ">
+	            	<div>
+		                <div class="img-box">
+			                <c:forEach var="file" items="${files}">
+			                    <img src="<c:url value='/upload/files/${file.fileThumbnailPath}' />" alt="${file.fileName}" />
+			                </c:forEach>
+		            	</div>
+		            	
+		            	<c:if test="${not empty board.boardVideoId}">
+				            <div class="video-content">
+				                <iframe src="https://www.youtube.com/embed/${board.boardVideoId}"
+				                        title="YouTube video player"
+				                        frameborder="0"
+				                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+				                        referrerpolicy="strict-origin-when-cross-origin"
+				                        allowfullscreen>
+				                </iframe>
+				            </div>
+		            	</c:if>
+		            	
+			            <div class="link-box">
+							<p>아이콘을 클릭하시면 관련 페이지로 이동합니다. ☞</p>
+							<a href="${board.boardLinkUrl}" class="board-link-url">
+								<img src="<c:url value='/static/images/news.png' />" width="100" />
+							</a>
+						</div>
+					</div>
+				</c:if> 
+				
                 <div class="board-content">
                     <c:out value="${board.boardContent}" />
                 </div>
+                
                 <div class="board-content-line"></div>
             </article>
 
@@ -104,7 +119,7 @@
     if (msg) { alert(msg); }
     const contextPath = '${pageContext.request.contextPath}';
     const sessionUserNum = '${sessionScope.userNum}';
-    const category = "upload";
+    const category = ["upload"];
     const boardcategory = '${criteria.category}';
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>

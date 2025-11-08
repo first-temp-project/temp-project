@@ -41,7 +41,7 @@
         </div>
 
         <div class="join-input-div">
-          <input type="text" name="userPhone" placeholder="핸드폰번호" value="${user.userPhone}" />
+          <input type="text" name="userPhone" placeholder="핸드폰번호" value="${user.userPhone}" readonly="readonly"/>
           <span class="error-msg"></span>
         </div>
 
@@ -87,6 +87,6 @@
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script src="<c:url value='/static/js/join.js' />"></script>
-<script src="<c:url value='/static/js/mypage-update.js' />"></script>
+<script type="module" src="<c:url value='/static/js/join.js' />"></script>
+<script type="module" src="<c:url value='/static/js/mypage-update.js' />"></script>
 </html>

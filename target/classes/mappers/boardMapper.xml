@@ -3,32 +3,45 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper
-	namespace="com.example.spring83.domain.mapper.BoardMapper">
+	namespace="com.example.spring95.domain.mapper.BoardMapper">
 
 	<select id="findByBoardNum" resultType="boardDto">
 		SELECT board_num,
 		board_title, board_content, board_register_date, board_update_date,
-		board_category, board_read_count, u.user_num, user_id
+		board_category, board_read_count, u.user_num, user_id, board_link_url, board_video_id
 		FROM tbl_user u
 		join tbl_board b on board_num = #{boardNum} AND u.user_num =
 		b.user_num
 	</select>
 
 	<select id="findByCriteria" resultType="boardDto">
-		SELECT board_num, board_title, board_content, board_register_date,
-		board_update_date, board_category, board_read_count, u.user_num,
-		user_id
-		FROM tbl_user u join tbl_board b on u.user_num = b.user_num and
-		board_category = #{category}
-		<include refid="search" />
-		order by board_num desc
-		limit #{startRow},#{amount}
+		SELECT board_num,
+		board_title, board_content, board_register_date, board_update_date,
+		board_category, board_read_count, u.user_num, user_id, board_link_url, board_video_id
+		FROM tbl_user u join tbl_board b on u.user_num = b.user_num 
+		WHERE board_category = #{category} <include refid="search"/>
+		ORDER BY board_num DESC
+		LIMIT #{offset}, #{amount}
 	</select>
+	
+	<select id="findByUserNumAndBoardNum" resultType="boardDto">
+		SELECT board_num,
+		board_title, board_content, board_register_date, board_update_date,
+		board_category, board_read_count, u.user_num, user_id, board_link_url, board_video_id
+		FROM tbl_user u join tbl_board b on u.user_num = b.user_num
+		WHERE board_num = #{boardNum} and u.user_num = #{userNum} 
+	</select>
+	
 
 	<select id="countByCriteria" resultType="long">
-		SELECT count(board_num) from tbl_user u join tbl_board b
-		on u.user_num = b.user_num <include refid="search"/>
+		SELECT count(board_num) FROM tbl_user u join tbl_board b
+		on u.user_num = b.user_num and board_category = #{category}
+		<where>
+			<include refid="search"/>
+		</where>
+		
 	</select>
+	
 	<update id="incrementBoardReadCount">
 		UPDATE tbl_board
 		SET board_read_count =
@@ -40,16 +53,23 @@
 		useGeneratedKeys="true">
 		INSERT INTO tbl_board
 		(board_title, board_content,
-		board_category, user_num)
+		board_category, user_num, board_link_url)
 		VALUES(#{boardTitle}, #{boardContent},
-		#{boardCategory}, #{userNum} )
+		#{boardCategory}, #{userNum}, #{boardLinkUrl} )
 	</insert>
 
 	<update id="update">
 		UPDATE tbl_board
-		SET board_title = #{boardTitle},
-		board_content = #{boardContent}, board_update_date = current_timestamp
-		WHERE user_num = #{userNum} AND board_num = #{boardNum}
+		<set>
+			<if test="boardVideoId != null and boardVideoId != ''">
+				board_video_id = #{boardVideoId},
+			</if>
+			<if test="boardLinkUrl != null and boardLinkUrl != ''">
+				board_link_url = #{boardLinkUrl},
+			</if>
+			board_title = #{boardTitle}, board_content = #{boardContent}, board_update_date = CURRENT_TIMESTAMP
+		</set>
+		WHERE board_num = #{boardNum} AND user_num = #{userNum}
 	</update>
 
 	<delete id="delete">
@@ -59,20 +79,19 @@
 	</delete>
 
 	<sql id="search">
-		<if
-			test="type != null and type != '' and keyword != null and keyword != ''">
-			<trim prefixOverrides="or" prefix="and(" suffix=")">
-				<foreach collection="types" item="type">
+		<if test="type != null and type != '' and keyword != null and keyword != ''">
+			<trim prefixOverrides="or" prefix="and (" suffix=")">
+				<foreach collection="types" item="tp">
 					<trim prefix="or">
 						<choose>
-							<when test="type == 'T'.toString()">
+							<when test="tp == 'T'.toString()">
 								board_title like concat('%',#{keyword},'%')
 							</when>
-							<when test="type == 'C'.toString()">
+							<when test="tp == 'C'.toString()">
 								board_content like concat('%',#{keyword},'%')
 							</when>
-							<when test="type == 'I'.toString()">
-								user_id like concat('%',#{keyword},'%')
+							<when test="tp == 'I'.toString()">
+								user_id = #{keyword}
 							</when>
 						</choose>
 					</trim>
@@ -80,5 +99,6 @@
 			</trim>
 		</if>
 	</sql>
+
 </mapper>
 

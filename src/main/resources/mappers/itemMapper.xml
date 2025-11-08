@@ -2,68 +2,95 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.spring83.domain.mapper.ItemMapper">
-	<insert id="insert" useGeneratedKeys="true" keyProperty="itemNum">
+<mapper namespace="com.example.spring95.domain.mapper.ItemMapper">
+	<insert id="insert" useGeneratedKeys="true"
+		keyProperty="itemNum">
 		INSERT INTO tbl_item
-		(item_uuid, item_name, item_upload_path, item_title, item_price, item_url, item_category)
-		VALUES(#{itemUuid}, #{itemName}, #{itemUploadPath}, #{itemTitle}, #{itemPrice}, #{itemUrl}, #{itemCategory})
+		(item_uuid, item_name,
+		item_upload_path, item_title, item_price, item_url, item_category,
+		user_num)
+		VALUES(#{itemUuid}, #{itemName}, #{itemUploadPath},
+		#{itemTitle}, #{itemPrice}, #{itemUrl}, #{itemCategory}, #{userNum})
 	</insert>
-	
-	<select id="findByCriteria" resultType="itemDto">
-		SELECT item_num, item_uuid, item_name, item_upload_path, item_title, item_price, item_url, item_category, 
-		item_register_date, item_update_date, item_is_recommend FROM tbl_item
-		WHERE
-		<if test="category != null and category != ''"> 
-			item_category = #{category}
-		</if>
-		<include refid="sort"/>
-		LIMIT #{startRow},#{amount}
-	</select>
-	
+
 	<update id="update">
 		UPDATE tbl_item
-		SET 
-		<if test="itemUuid != null and itemUuid != ''">
-			item_uuid = #{itemUuid},
-		</if>
-		<if test="itemUploadPath != null and itemUploadPath != ''">
-			item_upload_path = #{item_upload_path},
-		</if>
-		<if test="itemName != null and itemName != ''">
-			item_name = #{itemName},
-		</if>
-		item_title = #{itemTitle}, item_price = #{itemPrice}, item_url = #{itemUrl}, item_category = #{itemCategory}, item_update_date = curren_timestamp
-		WHERE item_num = #{itemNum}
+		<set>
+			<if test="itemUuid != null">
+				item_uuid = #{itemUuid},
+				item_upload_path = #{itemUploadPath},
+				item_name = #{itemName},
+			</if>					
+			item_title = #{itemTitle}, item_price = #{itemPrice}, item_url = #{itemUrl}, item_category= #{itemCategory}, item_update_date = CURRENT_TIMESTAMP
+		</set>
+		WHERE item_num = #{itemNum}			
 	</update>
-	
+
 	<delete id="deleteByItemNum">
-		DELETE FROM tbl_item 
+		DELETE FROM tbl_item
 		WHERE item_num = #{itemNum}
 	</delete>
-	
-	<select id="countByCriteria" resultType="long">
-		SELECT COUNT(item_num) from tbl_item
+
+	<select id="findByItemNum" resultType="itemDto">
+		SELECT item_num, item_uuid, item_name, item_upload_path, item_title,
+		item_price, item_url, item_category, item_register_date,
+		item_update_date, item_is_recommend
+		FROM tbl_item WHERE item_num =
+		#{itemNum}
+	</select>
+
+	<select id="findByCriteria" resultType="itemDto">
+		SELECT item_num, item_uuid, item_name, item_upload_path, item_title, item_price, item_url, item_category, item_register_date, 
+		item_update_date, item_is_recommend, user_num
+		FROM tbl_item
 		<where>
-			<if test="category != null and category != ''">
-				item_category = #{category}	
-			</if> 
+			<include refid="search"/>
+		</where>
+		<include refid="sort"/>
+		LIMIT #{offset}, #{amount}
+	</select>
+
+	<select id="countByCriteria" resultType="long">
+		SELECT count(item_num) FROM tbl_item
+		<where>
+			<include refid="search"/>
 		</where>
 	</select>
-	
-	<sql id="sort">
-		<choose>
-			<when test="sort == 'recent'.toString()">
-				ORDER BY itemNum DESC
-			</when>
-			<when test="sort == 'low_price'.toString()">
-				ORDER BY itemPrice 
-			</when>
-			<when test="sort == 'high_price'.toString()">
-				ORDER BY itemPrice DESC
-			</when>
-		</choose>
+
+	<select id="findByYesterDay" resultType="itemDto">
+		SELECT * FROM tbl_item
+		WHERE item_upload_path = DATE_FORMAT(current_timestamp - INTERVAL 1
+		DAY, '%Y/%m/%d')
+	</select>
+
+
+	<sql id="search">
+		<if test="category != null and category != ''">
+			item_category = #{category}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			and item_name like concat('%',#{keyword},'%')
+		</if>
 	</sql>
+
+	<sql id="sort">
+		ORDER BY
+			<choose>
+				<when test="sort == 'low_price'.toString()">
+					item_price ASC
+				</when>
+				<when test="sort == 'high_price'.toString()">
+					item_price DESC
+				</when>
+				<otherwise>
+					item_num DESC
+				</otherwise>
+			</choose>
+	  </sql>
 </mapper>
 
 
 
+
+
+	

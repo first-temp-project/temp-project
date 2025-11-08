@@ -128,11 +128,11 @@ input[name=multipartFiles] {
 	margin: 10px;;
 }
 /* boardWrite */
-ul.thumbnailUl {
+ul.thumbnail-ul {
 	display: flex;
 }
 
-ul.thumbnailUl>li {
+ul.thumbnail-ul>li {
 	width: 100px;
 	position: relative;
 }
@@ -156,16 +156,24 @@ img.file-cancel-btn {
 	right: 0;
 }
 /* thumbnail */
-.video-id-box {
-	padding: 15px 20px;
+.video-id-box, .link-url-box {
+	padding: 13px 20px;
 	border-bottom: 1px solid #dedede;
 }
 
-.video-id-input {
+.video-id-input, .board-link-input {
 	width: 100%;
 	border: none;
 	outline: none;
 	letter-spacing: -1px;
 	background: transparent;
 	color: #000;
+}
+
+.dimmed-container {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: none;
 }

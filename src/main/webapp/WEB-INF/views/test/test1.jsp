@@ -9,12 +9,13 @@
 <title>Insert title here</title>
 </head>
 <body>
-	테스트1
-	<h2>${criteria.category}</h2>
-	
-	<form:form method="post" action="/spring62/board/test2">
-		<input type="text" name="name" value="kim" />
-		<input type="submit" value="전송" />
-	</form:form>
+	<form method="post" action='<c:url value="/test/upload"/>'>
+		<input type="file" name="file"/>
+		<input type="submit" value="전송"/>
+	</form>
 </body>
+<script>
+	const msg = '${msg}';
+	alert(msg);
+</script>
 </html>

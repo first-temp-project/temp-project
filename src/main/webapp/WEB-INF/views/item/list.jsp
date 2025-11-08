@@ -20,48 +20,43 @@
     <div class="content">
       <nav class="products-category">
         <ul class="category-list">
-          <li class="product-menu"><a class="" href="">전체상품</a></li>
-          <li class="product-menu"><a class="" href="">중앙경제평론사</a></li>
-          <li class="product-menu"><a class="" href="">중앙생활사</a></li>
-          <li class="product-menu"><a class="" href="">중앙에듀북스</a></li>
+          <li class="product-menu"><a class=" ${empty criteria.category ? 'category-active' : ''}" href="<c:url value='/item/list' />">전체상품</a></li>
+          <li class="product-menu "><a class="${criteria.category == '중앙경제평론사' ? 'category-active' : ''}" href="<c:url value='/item/list?category=중앙경제평론사' />">중앙경제평론사</a></li>
+          <li class="product-menu "><a class="${criteria.category == '중앙생활사' ? 'category-active' : ''}" href="<c:url value='/item/list?category=중앙생활사' />">중앙생활사</a></li>
+          <li class="product-menu"><a class=" ${criteria.category == '중앙에듀북스' ? 'category-active' : ''}" href="<c:url value='/item/list?category=중앙에듀북스' />">중앙에듀북스</a></li>
         </ul>
       </nav>
       
      <div class="product-search-container">
-  		<form name="productSearchForm" method="get" action="">
-    		<input type="text" name="keyword" value="" placeholder="검색어를 입력하세요" />	
+  		<form name="productSearchForm" method="get" action="<c:url value='/item/list' />">
+  			<input type="hidden" name="category" value="${criteria.category}"  />	
+    		<input type="text" name="keyword" value="${criteria.keyword}" placeholder="검색어를 입력하세요" />	
     		<button type="submit" class="product-search-btn">검색</button>
   		</form>
 	 </div>
 
       <div class="sort-filter">
         <ul class="sortkey-filter">
-          <li class="sort-key"><a href="recent">최신순</a></li>
-          <li class="sort-key"><a href="low_price">낮은 가격순</a></li>
-          <li class="sort-key"><a href="high_price">높은 가격순</a></li>
+          <li class="sort-key ${criteria.sort == 'recent' ? 'sort-active' : ''}"><a href="recent">최신순</a></li>
+          <li class="sort-key ${criteria.sort == 'low_price' ? 'sort-active' : ''}"><a href="low_price">낮은 가격순</a></li>
+          <li class="sort-key ${criteria.sort == 'high_price' ? 'sort-active' : ''}"><a href="high_price">높은 가격순</a></li>
         </ul>
       </div>
 
       <ul class="product-list">
-        <form name="productPostForm" method="post">
-	  	  	 <input type="hidden" name="productNum" value=""/>
-	  	     <input type="hidden" name="page" value="" />
-       		 <input type="hidden" name="sort" value="" />
-       		 <input type="hidden" name="category" value="" />
-		</form>
         <c:forEach items="${items}" var="item">
-          <li class="item" data-product-num="" data-is-recommend="">
+          <li class="item" data-item-num="" data-is-recommend="">
 		          <div class="item-actions">
-		            <a href="<c:url value='/products/recommend/add' />" class="product-recommend-btn">추천 지정</a>
-		            <a href="<c:url value='/products/update${criteria.productParams}&productNum=${product.productNum}' />" class="product-update-btn">수정</a>
-		            <a href="<c:url value='/products/delete' />" class="product-delete-btn">삭제</a>
+		            <a href="<c:url value='/item/recommend/add' />" class="product-recommend-btn">추천 지정</a>
+		            <a href="<c:url value='/item/update${criteria.params}&itemNum=${item.itemNum}' />" class="product-update-btn">수정</a>
+		            <a href="<c:url value='/item/delete${criteria.params}&itemNum=${item.itemNum}' />" class="product-delete-btn">삭제</a>
 		          </div>
-            <a target="_blank" href="${product.productUrl}">
-              <img src=""/>
-              <div class="title"></div>
+            <a target="_blank" href="${item.itemUrl}">
+              <img src="<c:url value='/upload/item/${item.itemThumbnailPath}' />"/>
+              <div class="title">${item.itemTitle}</div>
               <div class="price">        
-                <span class="sale">원</span>
-                <span class="original">원</del></span>
+                <span class="sale"><fmt:formatNumber value="${item.itemDiscountPrice}" pattern="#,###" />원</span>
+                <span class="original"><del><fmt:formatNumber value="${item.itemPrice}" pattern="#,###" />원</del></span>
                 <span class="discount">10%</span>
               </div>
             </a>
@@ -96,7 +91,7 @@
     </div>
 
     <div>
-      <form name="productForm">
+      <form name="itemForm" action="<c:url value='/item/list'/>">
         <input type="hidden" name="page" value="${criteria.page}" />
         <input type="hidden" name="sort" value="${criteria.sort}" />
         <input type="hidden" name="category" value="${criteria.category}" />
@@ -117,5 +112,5 @@
   let sessionUserNum = '${sessionScope.userNum}';
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>
-<script src="<c:url value='/static/js/product-list.js' />"></script>
+<script src="<c:url value='/static/js/item-list.js' />"></script>
 </html>

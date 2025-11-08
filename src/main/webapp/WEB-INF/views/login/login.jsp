@@ -21,11 +21,11 @@
 			<div class="login-box">
 			      <header><span>로그인</span></header>
 			      <form name="loginForm" method="post">
-				        <input type="text" name="userId" placeholder="아이디" value="${cookie.id.value}"/>
+				        <input type="text" name="userId" placeholder="아이디" value="${cookie.id.value}" />
 				        <input type="password" name="userPassword" placeholder="비밀번호" />
 				        <input type="submit" value="로그인" />
 				        <div>
-				          <label> <input type="checkbox" name="rememberId"  ${empty cookie.id.value ? '' : 'checked'}/>&nbsp아이디 기억 </label>
+				          <label> <input type="checkbox" name="rememberId" ${empty cookie.id.value ? '' : 'checked'}/>&nbsp아이디 기억 </label>
 				          &nbsp;|&nbsp;<a href="<c:url value='/find-account' />">아이디 또는 비밀번호 찾기</a>&nbsp;|&nbsp;<a href="<c:url value='/join' />">회원가입</a>
 				       	</div>
 			      </form>

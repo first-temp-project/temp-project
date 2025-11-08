@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.spring83.domain.mapper.CommentMapper">
+<mapper namespace="com.example.spring95.domain.mapper.CommentMapper">
 
 	<insert id="insert" useGeneratedKeys="true" keyProperty="commentNum">
 		INSERT INTO tbl_comment
@@ -27,15 +27,23 @@
 	</select>
 
 	<select id="findByCriteriaAndBoardNum" resultType="commentDto">
-		SELECT comment_num, IFNULL(comment_parent_num, comment_num) comment_parent_num, comment_parent_id, comment_content, comment_register_date, comment_update_date, u.user_num, board_num, user_id
-		FROM tbl_user u JOIN tbl_comment c ON u.user_num = c.user_num AND board_num = #{boardNum} ORDER BY comment_parent_num, comment_num
-		LIMIT 0, #{criteria.endRow}
+		SELECT comment_num, IFNULL(comment_parent_num, comment_num) comment_parent_num, comment_parent_id, comment_content, 
+		comment_register_date, comment_update_date, u.user_num, board_num, user_id
+		FROM tbl_user u join tbl_comment c on u.user_num = c.user_num AND board_num = #{boardNum}
+		ORDER by comment_parent_num, comment_num
+		LIMIT 0, #{criteria.rowCount}
+		
+
 	</select>
 	
-	<select id="getNextPageCount" resultType="commentDto">
-		SELECT comment_num, IFNULL(comment_parent_num, comment_num) comment_parent_num FROM tbl_comment 
-		WHERE board_num = #{boardNum} ORDER BY comment_parent_num, comment_num
-		LIMIT #{criteria.startRow}, #{criteria.amount}    
+	<select id="getPageCount" resultType="_int">
+		SELECT count(comment_num) FROM
+			(
+				SELECT comment_num, comment_parent_num, comment_parent_id, comment_content, 
+				comment_register_date, comment_update_date, u.user_num, board_num, user_id
+				FROM tbl_user u join tbl_comment c on u.user_num = c.user_num AND board_num = #{boardNum}
+				LIMIT #{criteria.offset}, #{criteria.amount}
+			) c
 	</select>
 </mapper>
 

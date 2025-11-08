@@ -1,35 +1,209 @@
-const validationChecks =
-{
+export const validationChecks = {
 	userId: false,
 	userPassword: false,
 	userPasswordCheck: false,
 	userPhone: false,
 	userEmail: false
 }
-const joinService = (function() {
+const $passwordInput = $("input[name=userPassword]");
+const $passwordCheckInput = $("input[name=userPasswordCheck]");
 
-	function checkId(id, callback) {
+
+const joinService = (function() {
+	function checkId(id, successCallback, errorCallback) {
 		$.ajax({
-			url: `${contextPath}/user/checkId`,
+			url: `${contextPath}/join/checkId`,
 			method: 'post',
 			contentType: 'application/json;charset=UTF-8',
 			data: JSON.stringify(id),
-			success: callback
+			success: successCallback,
+			error: errorCallback
 		});
 	}
 
-	function checkEmail(email, callback) {
+	function checkEmail(email, successCallback, errorCallback) {
 		$.ajax({
-			url: `${contextPath}/user/checkEmail`,
+			url: `${contextPath}/join/checkEmail`,
 			method: 'post',
 			contentType: 'application/json;charset=UTF-8',
 			data: JSON.stringify(email),
-			success: callback
+			success: successCallback,
+			error: errorCallback
 		});
 	}
 
 	return { checkId, checkEmail };
 })();
+
+$("input[name=userId]").on("blur", function() {
+	const $input = $(this);
+	const userId = $input.val().trim();
+	if (!userId || $input.prop("readonly")) { return; }
+	const isSuccess = validateId(userId);
+	const msg = isSuccess ? "" : "잘못된 아이디 입니다.";
+	console.log(isSuccess);
+	changeCss($input, isSuccess, msg);
+	setValidationChecks($input, isSuccess);
+	if (!isSuccess) { return; }
+	joinService.checkId(
+		{ userId },
+		isSuccess => successCallback($input, isSuccess, "중복된 아이디입니다"),
+		xhr => errorCallback(xhr, $input, "아이디를 입력하지 않으셨습니다 다시 시도해 주세요.")
+	);
+});
+
+$("input[name=userEmail]").on("blur", function() {
+	const $input = $(this);
+	const userEmail = $input.val().trim();
+	if (!userEmail || $input.prop("readonly")) { return; }
+	const isSuccess = validateEmail(userEmail);
+	const msg = isSuccess ? "" : "잘못된 이메일 입니다.";
+	changeCss($input, isSuccess, msg);
+	setValidationChecks($input, isSuccess);
+	if (!isSuccess) { return; }
+	joinService.checkEmail(
+		{ userEmail },
+		isSuccess => successCallback($input, isSuccess, "중복된 이메일 입니다."),
+		xhr => errorCallback(xhr, $input, "이메일을 입력하지 않으셨습니다 다시 시도해 주세요.")
+	);
+});
+
+$passwordInput.on("blur", function() {
+	const password = $passwordInput.val().trim();
+	if (!password || $passwordInput.prop("readonly")) { return; }
+	const isSuccess = validatePassword(password);
+	const msg = isSuccess ? "" : getPasswordErrorMsg(password);
+	changeCss($passwordInput, isSuccess, msg);
+	setValidationChecks($passwordInput, isSuccess);
+	$passwordCheckInput.trigger("blur");
+});
+
+$passwordCheckInput.on("blur", function() {
+	const password = $passwordInput.val().trim();
+	const passwordCheck = $passwordCheckInput.val().trim();
+	if (!password || !passwordCheck) { return; }
+	const isSuccess = password === passwordCheck;
+	const msg = isSuccess ? "" : "두 비밀번호가 서로 일치하지 않습니다.";
+	changeCss($passwordCheckInput, isSuccess, msg);
+	setValidationChecks($passwordCheckInput, isSuccess);
+});
+
+$("input[name=userPhone]").on("blur", function() {
+	console.log("phone");
+	const $input = $(this);
+	const phone = $input.val().trim();
+	if (!phone || $input.prop("readonly")) { return; }
+	const isSuccess = validatePhone(phone);
+	const msg = isSuccess ? "" : "잘못된핸드폰 번호 입니다.";
+	changeCss($input, isSuccess, msg);
+	setValidationChecks($input, isSuccess);
+});
+
+$("input.submit").on("click", function(e) {
+	e.preventDefault();
+	if (!emptyCheck()) { return; }
+	if (hasFalse()) { alert("모든 필드를 정확히 입력해주세요."); return; }
+	$(this).closest("form").submit();
+});
+
+
+function successCallback($input, isSuccess, errorMsg) {
+	changeCss($input, isSuccess, isSuccess ? "" : errorMsg);
+	setValidationChecks($input, isSuccess);
+}
+
+
+function errorCallback(xhr, $input, errorMsg) {
+	errorMsg = xhr.status == 400 ? errorMsg : "오류가 발생했습니다. 다시 시도해주세요";
+	changeCss($input, false, errorMsg);
+	setValidationChecks($input, false);
+}
+
+export function changeCss($input, isSuccess, msg) {
+	const $span = $input.next("span");
+	const color = isSuccess ? 'rgb(240,240,240)' : 'red';
+	$span.css({ 'outline-color': color, 'border-color': color }); //히이픈잇으면 따옴표필요 카멜은 따옴표 x js에서 키값 문자열로 자동변환
+	isSuccess ? $span.hide() : $span.text(msg).show();
+}
+
+export function setValidationChecks($input, isSuccess) {
+	const name = $input.attr("name");
+	validationChecks[name] = isSuccess;
+}
+
+function hasFalse() {
+	return Object.values(validationChecks).includes(false);
+}
+
+// 조건별 상세 체크 함수
+function getPasswordErrorMsg(password) {
+	if (password.length < 8 || password.length > 16) {
+		return "비밀번호는 8자 이상 16자 이하로 입력하세요.";
+	}
+	if (!/[a-zA-Z]/.test(password)) {
+		return "영문자를 최소 1자 이상 포함해야 합니다.";
+	}
+	if (!/\d/.test(password)) {
+		return "숫자를 최소 1자 이상 포함해야 합니다.";
+	}
+	if (!/[!@#$%^&*()_\-+=]/.test(password)) {
+		return "특수문자(!@#$%^&*()_-+=)를 최소 1자 이상 포함해야 합니다.";
+	}
+	return "";
+}
+
+function validateId(id) { /*아이디 정규식*/
+	const regex = /^[a-z0-9_-]{5,20}$/;
+	if (!regex.test(id)) {
+		return false;
+	}
+	return true;
+}
+
+function validatePassword(password) {
+	const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=])[A-Za-z\d!@#$%^&*()_\-+=]{8,16}$/;
+	return regex.test(password);
+}
+
+function validateEmail(email) { /*이메일정규식*/
+	const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
+	if (!regex.test(email)) {
+		return false;
+	}
+	return true;
+}
+
+function validatePhone(phoneNumber) {  /*핸드폰정규식*/
+	const regex = /^(01[0-9]{1})-?([0-9]{3,4})-?([0-9]{4})$/;
+	if (!regex.test(phoneNumber)) {
+		return false;
+	}
+	return true;
+}
+
+export function emptyCheck() { /*join input empty check*/
+	if (!$("input[name = userId]").val().trim()) {
+		alert("아이디를 입력해주세요.");
+		return false;
+	}
+	if (!$("input[name = userPassword]").val().trim()) {
+		alert("비밀번호를 입력해주세요.");
+		return false;
+	}
+	if (!$("input[name = userPasswordCheck]").val().trim()) {
+		alert("비밀번호를 한번더 입력해주세요.");
+		return false;
+	}
+	if (!$("input[name = userPhone]").val().trim()) {
+		alert("핸드폰번호를 입력해주세요.");
+		return false;
+	}
+	if (!$("input[name = userEmail]").val().trim()) {
+		alert("이메일을 입력해주세요.");
+		return false;
+	}
+	return true;
+}
 
 function sample6_execDaumPostcode() {
 	new daum.Postcode({
@@ -74,159 +248,4 @@ function sample6_execDaumPostcode() {
 			document.getElementById('sample6_detailAddress').focus();
 		},
 	}).open();
-}
-
-$("input[name=userId]").on("blur", function(e) {
-	const $input = $(this);
-	const userId = $input.val().trim();
-	if (!userId || $input.prop("readonly")) { return; }
-	const isSuccess = validateId(userId);
-	const msg = isSuccess ? "" : "잘못된 아이디 입니다.";
-	changeCss($input, isSuccess, msg);
-	setValidationCheck($input, validationChecks, isSuccess);
-	if (!isSuccess) { return; }
-	joinService.checkId({ userId }, (isSuccess) => {
-		const msg = isSuccess ? "" : "중복된 아이디 입니다.";
-		changeCss($input, isSuccess, msg);
-		setValidationCheck($input, validationChecks, isSuccess);
-	});
-});
-
-$("input[name=userEmail]").on("blur", function(e) {
-	const $input = $(this);
-	const userEmail = $input.val().trim();
-	if (!userEmail || $input.prop("readonly")) { return; }
-	const isSuccess = validateEmail(userEmail);
-	const msg = isSuccess ? "" : "잘못된 아이디 입니다.";
-	changeCss($input, isSuccess, msg);
-	setValidationCheck($input, validationChecks, isSuccess);
-	if (!isSuccess) { return; }
-	joinService.checkEmail({ userEmail }, (isSuccess) => {
-		const msg = isSuccess ? "" : "중복된 이메일 입니다.";
-		changeCss($input, isSuccess, msg);
-		setValidationCheck($input, validationChecks, isSuccess);
-	});
-});
-
-$("input[name=userPassword]").on("blur", function() {
-	const $input = $(this);
-	const password = $input.val().trim();
-	if (!password || $input.prop("readonly")) { return; }
-	const isSuccess = validatePassword(password);
-	const msg = isSuccess ? "" : "잘못된 비밀번호 입니다.";
-	changeCss($input, isSuccess, msg);
-	setValidationCheck($input, validationChecks, isSuccess);
-	$("input[name=userPasswordCheck]").trigger("blur");
-});
-
-$("input[name=userPasswordCheck]").on("blur", function() {
-	const $input = $(this);
-	const password = $("input[name=userPassword]").val().trim();
-	const confirmPassword = $input.val().trim();
-	if (!password || !confirmPassword) { return; }
-	const isSuccess = password === confirmPassword;
-	const msg = isSuccess ? "" : "두 비밀번호가 서로 일치하지 않습니다.";
-	changeCss($input, isSuccess, msg);
-	setValidationCheck($input, validationChecks, isSuccess);
-});
-
-$("input[name=userPhone]").on("blur", function() {
-	const $input = $(this);
-	const phone = $input.val().trim();
-	if (!phone || $input.prop("readonly")) { return; }
-	const isSuccess = validatePhone(phone);
-	const msg = isSuccess ? "" : "잘못된 핸드폰번호 입니다.";
-	changeCss($input, isSuccess, msg);
-	setValidationCheck($input, validationChecks, isSuccess);
-});
-
-$("input[class=submit]").on("click", function(e) {
-	e.preventDefault();
-	if (!emptyCheck()) { return; }
-	const result = Object.values(validationChecks).includes(false);
-	if (result) { alert("모든 필드를 정확히 입력해주세요."); return; }
-	$(this).closest("form").submit();
-});
-
-function setValidationCheck($input, validationChecks, isSuccess) {
-	const name = $input.attr("name");
-	validationChecks[name] = isSuccess;
-}
-
-function changeCss($input, isSuccess, msg) {
-	const $span = $input.next("span.error-msg");
-	let color = isSuccess ? "rgb(240,240,240)" : "red";
-	$input.css({ "outline-color": color, "border-color": color });
-	isSuccess ? $span.hide() : $span.text(msg).show();
-}
-
-function getPasswordChecks() {
-	const { userPassword, userPasswordCheck } = validationChecks;
-	return { userPassword, userPasswordCheck };
-}
-
-function resetPasswordCheck($passwordInput, $confirmPasswordInput) {
-	let names = [$passwordInput.attr("name"), $confirmPasswordInput.attr("name")];
-	names.forEach(name => validationChecks[name] = false);
-}
-
-function validateId(id) { /*아이디 정규식*/
-	const regex = /^[a-z0-9_-]{5,20}$/;
-	if (!regex.test(id)) {
-		return false;
-	}
-	return true;
-}
-
-/*function validatePassword(password) { 비밀번호 정규식
-	const regex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z\d]{7,16}$/;
-	if (!regex.test(password)) {
-		return false;
-	}
-	return true;
-}
-*/
-function validatePassword(password) {
-	const regex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_\-+=])[A-Za-z\d!@#$%^&*()_\-+=]{8,16}$/;
-	return regex.test(password);
-}
-
-function validateEmail(email) { /*이메일정규식*/
-	const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/i;
-	if (!regex.test(email)) {
-		return false;
-	}
-	return true;
-}
-
-function validatePhone(phoneNumber) {  /*핸드폰정규식*/
-	const regex = /^(01[0-9]{1})-?([0-9]{3,4})-?([0-9]{4})$/;
-	if (!regex.test(phoneNumber)) {
-		return false;
-	}
-	return true;
-}
-
-function emptyCheck() { /*join input empty check*/
-	if (!$("input[name = userId]").val().trim()) {
-		alert("아이디를 입력해주세요.");
-		return false;
-	}
-	if (!$("input[name = userPassword]").val().trim()) {
-		alert("비밀번호를 입력해주세요.");
-		return false;
-	}
-	if (!$("input[name = userPasswordCheck]").val().trim()) {
-		alert("비밀번호를 한번더 입력해주세요.");
-		return false;
-	}
-	if (!$("input[name = userPhone]").val().trim()) {
-		alert("핸드폰번호를 입력해주세요.");
-		return false;
-	}
-	if (!$("input[name = userEmail]").val().trim()) {
-		alert("이메일을 입력해주세요.");
-		return false;
-	}
-	return true;
 }

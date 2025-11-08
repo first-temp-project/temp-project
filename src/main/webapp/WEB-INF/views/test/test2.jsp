@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>    
+	pageEncoding="UTF-8"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +9,11 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<h2>${criteria.category} 테스트2 값확인</h2>
-
+	테스트2
 </body>
+<script>
+const msg = '${msg}';
+alert(msg);
+</script>
+	
 </html>

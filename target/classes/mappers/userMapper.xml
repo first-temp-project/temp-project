@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.spring83.domain.mapper.UserMapper">
+<mapper namespace="com.example.spring95.domain.mapper.UserMapper">
 	<select id="findByUserId" resultType="userDto">
 		SELECT user_num, user_id, user_password, user_email, user_phone, user_zip_code, user_address, user_detail_address, user_role
 		FROM tbl_user 

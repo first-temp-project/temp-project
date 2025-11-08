@@ -28,26 +28,26 @@
 	
 				<div>
 					<label for="title">제목</label>
-					<input type="text" id="title" name="itemTitle" placeholder="상품명 입력" maxlength="50" required />
+					<input type="text" id="title" name="itemTitle" placeholder="상품명 입력" maxlength="50" value="${item.itemTitle}" required />
 				</div>
 	
 				<div>
 					<label for="price">가격 (원)</label>
-					<input type="number" id="price" name="itemPrice" min="0" placeholder="가격 입력" required />
+					<input type="number" id="price" name="itemPrice" min="0" placeholder="가격 입력" value="${item.itemPrice}" required />
 				</div>
 	
 				<div>
 					<label for="url">클릭 시 이동 URL</label>
-					<input type="url" id="url" name="itemUrl" placeholder="https://example.com" required />
+					<input type="url" id="url" name="itemUrl" placeholder="https://example.com" value="${item.itemUrl}" required />
 				</div>
 	
 				<div>
 					<label for="category">카테고리</label>
 					<select id="category" name="itemCategory" required>
-						<option value="" disabled selected>카테고리 선택</option>
-						<option value="중앙경제평론사">중앙경제평론사</option>
-						<option value="중앙생활사">중앙생활사</option>
-						<option value="중앙에듀북스">중앙에듀북스</option>
+						<option value="" ${item.itemCategory == null? 'selected' : ''} >카테고리 선택</option>
+						<option value="중앙경제평론사" ${item.itemCategory == '중앙경제평론사'? 'selected' : ''}>중앙경제평론사</option>
+						<option value="중앙생활사" ${item.itemCategory == '중앙생활사'? 'selected' : ''}>중앙생활사</option>
+						<option value="중앙에듀북스" ${item.itemCategory == '중앙에듀북스'? 'selected' : ''}>중앙에듀북스</option>
 					</select>
 				</div>
 				
@@ -58,7 +58,7 @@
 						<option value="true">추천 도서로 설정합니다.</option>
 					</select>
 				</div> -->
-				<button class="product-cancel-btn" type="button" onclick="history.back()">취소하기</button>
+				<button class="product-cancel-btn" type="button" data-url="<c:url value='/item/list${criteria.params}' />">취소하기</button>
 				<button type="button" class="product-register-btn">등록하기</button>
 			</form>
 		</div>

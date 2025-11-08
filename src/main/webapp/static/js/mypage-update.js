@@ -1,31 +1,86 @@
+import { changeCss, setValidationChecks, emptyCheck, validationChecks } from './join.js';
 const $passwordInput = $("input[name=userPassword]");
-const $confirmPasswordInput = $("input[name=userPasswordCheck]");
+const $passwordCheckInput = $("input[name=userPasswordCheck]");
+const { $updateReadyBtn, $updateDoneBtn, $cancelBtn } = getBtns();
 let password = "";
-$("input.changePwBtn").on("click", function(e) {
+
+
+$updateReadyBtn.on("click", function(e) {
 	e.preventDefault();
-	$("input.cancelChangePwBtn").show();
-	$(this).hide().next().show();
-	password = $passwordInput.val();
-	$confirmPasswordInput.attr("type", "password");
-	$passwordInput.prop("readonly", false).val("").focus();
+	$updateReadyBtn.hide();
+	$updateDoneBtn.show();
+	$cancelBtn.show();
+	password = $passwordInput.val().trim();
+	$passwordCheckInput.attr("type", "password");
+	$passwordInput.prop("readOnly", false).val("").focus();
 });
 
-$("input.cancelChangePwBtn").on("click", function(e) {
-	e.preventDefault();
-	$(this).hide();
-	$("input.changePwBtn").show().next().hide();
-	$passwordInput.prop("readonly", true).val(password);
-	password = "";
-	$confirmPasswordInput.val("").attr("type", "hidden");
-	changeCss($passwordInput, true);
-	changeCss($confirmPasswordInput, true);
-	resetPasswordCheck($passwordInput, $confirmPasswordInput);
-});
 
-$("input.changePwOkbtn").on("click", function(e) {
+$updateDoneBtn.on("click", function(e) {
 	e.preventDefault();
-	const { userPassword, userPasswordCheck } = getPasswordChecks();
 	if (!emptyCheck()) { return; }
-	if (!userPassword || !userPasswordCheck) { alert("모든 항목을 정확히 입력하세요"); return; }
+	const { userPassword, userPasswordCheck } = validationChecks;
+	if (!userPassword || !userPasswordCheck) { alert("모든 필드를 정확히 입력하세요."); return; }
 	$(this).closest("form").submit();
 });
+
+
+$cancelBtn.on("click", function(e) {
+	e.preventDefault();
+	$updateReadyBtn.show();
+	$updateDoneBtn.hide();
+	$cancelBtn.hide();
+	changeCss($passwordInput, true);
+	changeCss($passwordCheckInput, true);
+	setValidationChecks($passwordInput, false);
+	setValidationChecks($passwordCheckInput, false);
+	$passwordCheckInput.attr("type", "hidden");
+	$passwordInput.prop("readOnly", true).val(password);
+	password = "";
+});
+
+
+
+function getBtns() {
+	return {
+		$updateReadyBtn: $("input.changePwBtn"),
+		$updateDoneBtn: $("input.changePwOkbtn"),
+		$cancelBtn: $("input.cancelChangePwBtn")
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

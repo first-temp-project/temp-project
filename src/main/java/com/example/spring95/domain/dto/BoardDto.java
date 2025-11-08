@@ -1,0 +1,23 @@
+package com.example.spring95.domain.dto;
+
+import java.util.List;
+
+import lombok.Data;
+
+@Data
+public class BoardDto {
+	private Long boardNum;
+	private String boardTitle;
+	private String boardContent;
+	private String boardRegisterDate;
+	private Long boardReadCount;
+	private Long boardCommentCount;
+	private Long userNum;
+	private String boardUpdateDate;
+	private String boardCategory;
+	private String boardLinkUrl;
+	private String boardVideoId;
+	private String userId;
+	private List<FileDto> insertFiles;
+	private List<FileDto> deleteFiles;
+}

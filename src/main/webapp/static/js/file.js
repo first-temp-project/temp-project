@@ -1,23 +1,19 @@
-window.boardNum = $("#board-container").data("boardNum");
-const $thumbnailUl = $("ul.thumbnailUl");
-const $fileInput = $("input[name=multipartFiles]");
-const fileArray = new Array();
-const isUpdate = $fileInput.data("update");
-const removeClassName = "remove";
-const updateClassName = "new";
-const maxSize = 1024 * 1024 * 100;
-const maxLength = 3;
 const fileService = (function() {
-	function upload(formData, callback) {
+	function upload(formData, category, callback) {
+		const $dimmed = $(".dimmed-container");
+
 		$.ajax({
-			url: `${contextPath}/files/upload`,
+			url: `${contextPath}/files/upload?category=${category}`,
 			method: 'post',
 			contentType: false,
 			processData: false,
+			beforeSend() { $dimmed.show() },
+			complete() { $dimmed.hide() },
 			data: formData,
 			success: callback
 		});
 	}
+
 	function getFiles(boardNum, callback) {
 		$.ajax({
 			url: `${contextPath}/files/${boardNum}`,
@@ -26,149 +22,176 @@ const fileService = (function() {
 		});
 	}
 
-	function getLength(boardNum, callback) {
+	function count(boardNum, callback) {
 		$.ajax({
-			url: `${contextPath}/files/length/${boardNum}`,
+			url: `${contextPath}/files/count/${boardNum}`,
 			method: 'get',
-			dataType: 'json',
 			async: false,
 			success: callback
 		});
 	}
-	return { upload, getFiles, getLength };
+
+	return { upload, getFiles, count };
+
 })();
-let totalFileSize = 0;
+
+export const classNames = { ORIGINAL: "original", NEW: "new", REMOVE: "remove" };
+const $fileInput = $("input[name=multipartFiles]");
+const $thumbnailUl = $("ul.thumbnail-ul");
+const fileSizeArray = [];
+const fileArray = [];
+let fileTotalCount = 0;
+let fileTotalSize = 0;
+let fileRemoveCount = 0;
+
 $fileInput.on("change", function() {
-	const files = Array.from($fileInput[0].files);
-	let dbfilesLength = 0;
-	if (boardNum) { fileService.getLength(boardNum, length => dbfilesLength += length); }
-	console.log(boardNum);
-	console.log("db==="+dbfilesLength);
-	console.log("files.len=="+files.length);
-	console.log("fileArray=="+fileArray.length);
-	let currentLength = dbfilesLength + files.length + fileArray.length;
-	if (currentLength > maxLength) { alert("파일은 최대 3개까지만 업로드할 수 있습니다."); return; }
+	const boardNum = $(".container").data("boardNum");
 	const formData = new FormData();
-	const isUpdate = $fileInput.data("update");
-	files.forEach(file => {
-		if (!validateFile(file.name, file.size)) { return false; }
+	const category = getCategory();
+	const files = Array.from($fileInput[0].files);
+	const fileMaxCount = 2;
+	fileTotalCount = files.length + fileArray.length + fileRemoveCount;
+	if (boardNum) { fileService.count(boardNum, count => fileTotalCount += count); }
+	if (fileMaxCount < fileTotalCount) {
+		alert("파일은 2개까지만 업로드 가능합니다.");
+		refreshFileInput(fileArray, fileSizeArray);
+		return;
+	}
+
+	for (const file of files) {
+		if ("download" != category && !isImage(file.type)) { rejectUpload("이미지 형식만 업로드 가능합니다", fileArray, fileSizeArray); return; }
+		if (!validateFileSize(file.size)) { rejectUpload("업르드가능한 사이즈를 초과하엿습니다.", fileArray, fileSizeArray); return; }
+		if (!validateFileName(file.name)) { rejectUpload("업로드 불가능한 파일 형식 입니다.", fileArray, fileSizeArray); return; }
 		fileArray.push(file);
+		fileSizeArray.push(file.size);
 		formData.append("multipartFiles", file);
-	});
-	isUpdate ? fileService.upload(formData, files => appendThumbnails({ $ul: $thumbnailUl, files, isUpdate })) : fileService.upload(formData, files => appendThumbnails({ $ul: $thumbnailUl, files }));
-	resetFileInput($fileInput, fileArray);
+	}
+
+	fileService.upload(formData, category, files => isUpdate() ? appendThumbnails(files, true) : appendThumbnails(files, false));
+	refreshFileInput(fileArray, fileSizeArray);
 });
 
-
-$thumbnailUl.on("click", "img.file-cancel-btn", function() {
-	const $li = $(this).closest("li");
+$thumbnailUl.on("click", ".file-cancel-btn", function(e) {
+	e.preventDefault();
+	const $cancelBtn = $(this);
+	const $li = $cancelBtn.closest("li");
 	let index;
-	if (!isUpdate) {
-		index = $("img.file-cancel-btn").index($(this));
-		$li.eq(index).remove();
-		removeArrayByIndex($fileInput, fileArray, index);
+
+	if (!isUpdate()) {
+		index = $(".file-cancel-btn").index($cancelBtn);
+		$li.remove();
+		refreshFileInput(fileArray, fileSizeArray, index);
+		return;
 	}
-	index = $(`li.${updateClassName}`).index($li);
+
+	index = $(`li.${classNames.NEW}`).index($li);
 	if (index != -1) {
 		$li.remove();
-		removeArrayByIndex($fileInput, fileArray, index);
-
-	} else {
-		$li.attr("class", removeClassName).hide();
+		refreshFileInput(fileArray, fileSizeArray, index);
+		return;
 	}
 
+	$li.attr("class", classNames.REMOVE).hide();
+	--fileRemoveCount;
 });
 
-function getIsUpdate() {
-	return isUpdate;
+
+export function showThumbnails(boardNum, isDownload) {
+	fileService.getFiles(boardNum, files => appendThumbnails(files, false, isDownload));
 }
 
-function getThumbnailUl() {
-	return $thumbnailUl;
+function appendThumbnails(files, isUpdate, isDownload) {
+	const html = createThumbnails(files, isUpdate, isDownload);
+	$thumbnailUl.append(html);
 }
 
-function getBoardNum() {
-	return boardNum;
-}
-
-function getRemoveClassName() {
-	return removeClassName;
-}
-
-function getUpdateClassName() {
-	return updateClassName;
-}
-
-function removeArrayByIndex($fileInput, fileArray, index) {
-	fileArray.splice(index, 1);
-	resetFileInput($fileInput, fileArray);
-}
-
-function resetFileInput($fileInput, fileArray) {
-	const dataTransfer = new DataTransfer();
-	fileArray.forEach(file => dataTransfer.items.add(file));
-	$fileInput[0].files = dataTransfer.files;
-}
-
-function showThumbnails($ul, boardNum, isDownload) {
-	fileService.getFiles(boardNum, files => appendThumbnails({ $ul, files, isDownload, isUpdate: false }));
-}
-
-function appendThumbnails({ $ul, files, isDownload, isUpdate }) {
-	let html = createThumbnails(files, isDownload, isUpdate);
-	$ul.append(html);
-}
-
-function createFileInfoInputs($ul, className = "original") {
-	let name = className === removeClassName ? "deleteFiles" : "files";
+function createThumbnails(files, isUpdate = false, isDownload = false) {
+	if (!files) { return ""; }
+	const category = getCategory();
 	let html = "";
-	$ul.find(`li.${className}`).each((i, li) => {
-		html += `<input type="hidden" name="${name}[${i}].fileNum" value="${li.dataset.fileNum}" /> `;
-		html += `<input type="hidden" name="${name}[${i}].fileUuid" value="${li.dataset.fileUuid}" /> `;
-		html += `<input type="hidden" name="${name}[${i}].fileUploadPath" value="${li.dataset.fileUploadPath}" /> `;
-		html += `<input type="hidden" name="${name}[${i}].fileName" value="${li.dataset.fileName}" /> `;
-		html += `<input type="hidden" name="${name}[${i}].fileType" value="${li.dataset.fileType}" /> `;
-		html += `<input type="hidden" name="${name}[${i}].fileSize" value="${li.dataset.fileSize}" /> `;
-	});
-	return html;
-}
 
-function createThumbnails(files, isDownload = false, isUpdate = false) {
-	let className = isUpdate ? updateClassName : 'original';
-	let html = "";
 	files.forEach(file => {
-		let displayFileName = encodeURIComponent(`${file.fileUploadPath}/t_${file.fileUuid}_${file.fileName}`);
-		let downloadFileName = displayFileName.replace("t_", "");
-		let fileNum = file.fileNum ? file.fileNum : "";
-		html += `<li class="${className}" data-file-num="${fileNum}" data-file-uuid="${file.fileUuid}" data-file-upload-path="${file.fileUploadPath}" data-file-name="${file.fileName}" data-file-type="${file.fileType}" data-file-size="${file.fileSize}"/> `;
-		html += isDownload ? `<a href="${contextPath}/files/download?fileName=${downloadFileName}">` : ``;
-		html += file.fileType ? `<img src="${contextPath}/files/display?fileName=${displayFileName}" width="100" />` : `<img src="${contextPath}/static/images/attach.png" width="25" />`;
+		const displayFilePath = `${file.fileUploadPath}/t_${file.fileUuid}_${file.fileName}`;
+		const downloadFilePath = displayFilePath.replace("t_", "");
+		html += `<li class="${isUpdate ? classNames.NEW : classNames.ORIGINAL}" data-file-num="${file.fileNum ? file.fileNum : ''}" data-file-uuid="${file.fileUuid}" data-file-upload-path="${file.fileUploadPath}" data-file-name="${file.fileName}" data-file-size="${file.fileSize}" data-file-type="${file.fileType}" />`;
+		html += isDownload ? `<a href="${contextPath}/files/download?filePath=${downloadFilePath}&category=${category}">` : ``;
+		html += file.fileType ? `<img src="${contextPath}/files/display?filePath=${displayFilePath}&category=${category}" width="100" />` : `<img src="${contextPath}/static/images/attach.png" width="100" />`;
 		html += isDownload ? `</a>` : ``;
 		html += !isDownload ? `<img class="file-cancel-btn" src="${contextPath}/static/images/cancel.png" width="25" />` : ``;
 		html += `</li>`;
 	});
+
 	return html;
 }
 
+export function createHiddenInputs(className = classNames.ORIGINAL) {
+	const name = className == classNames.REMOVE ? 'deleteFiles' : 'insertFiles';
+	let html = "";
+	$(`li.${className}`).each((i, li) => {
+		html += `<input type="hidden" name="${name}[${i}].fileNum" value="${li.dataset.fileNum}" />`;
+		html += `<input type="hidden" name="${name}[${i}].fileUuid" value="${li.dataset.fileUuid}" />`;
+		html += `<input type="hidden" name="${name}[${i}].fileUploadPath" value="${li.dataset.fileUploadPath}" />`;
+		html += `<input type="hidden" name="${name}[${i}].fileName" value="${li.dataset.fileName}" />`;
+		html += `<input type="hidden" name="${name}[${i}].fileSize" value="${li.dataset.fileSize}" />`;
+		html += `<input type="hidden" name="${name}[${i}].fileType" value="${li.dataset.fileType}" />`;
+	});
+	return html;
+}
+
+function refreshFileInput(fileArray, fileSizeArray, index = -1) {
+	const dataTransfer = new DataTransfer();
+	if (index >= 0) {
+		removeFile(fileArray, index);
+		removeFileSize(fileSizeArray, index);
+	}
+	fileArray.forEach(file => dataTransfer.items.add(file));
+	$("input[name=multipartFiles]")[0].files = dataTransfer.files;
+}
+
+function removeFile(fileArray, index) {
+	fileArray.splice(index, 1);
+}
+
+function removeFileSize(fileSizeArray, index) {
+	console.log("삭제전",fileTotalSize);
+	fileTotalSize -= fileSizeArray[index];
+	fileSizeArray.splice(index, 1);
+	console.log("삭제후",fileTotalSize);
+}
+
+export function isUpdate() {
+	return $(".container").data("boardUpdate");
+}
+
+export function getCategory() {
+	return $(".container").data("boardCategory");
+}
+
+function isImage(fileType) {
+	return fileType && fileType.startsWith("image/");
+}
 
 function validateFileSize(fileSize) {
-	totalFileSize += fileSize;
-	if (totalFileSize > maxSize) {
-		alert("업로드 가능한 용량을 초과하였습니다.");
-		totalFileSize -= fileSize;
+	const maxFileSize = 1024 * 1024 * 50;
+	if (maxFileSize < fileTotalSize + fileSize) {
+		return false;
+	}
+	fileTotalSize += fileSize;
+	return true;
+}
+
+function validateFileName(fileName) {
+	let regExp = new RegExp("(.*/)\.(exe|sh|alz)$", "i");
+	if (regExp.test(fileName)) {
 		return false;
 	}
 	return true;
 }
 
-function validateFile(fileName, fileSize) {
-	if (!validateFileSize(fileSize)) {
-		return false;
-	}
-	let regExp = new RegExp("(.*/)\.(exe|sh|alz)$", "i");
-	if (regExp.test(fileName)) {
-		alert("업로드 가능한 파일 형식이 아닙니다.");
-		return false;
-	}
-	return true;
+function rejectUpload(msg, fileArray, fileSizeArray) {
+	alert(msg);
+	refreshFileInput(fileArray, fileSizeArray);
 }
+
+
+

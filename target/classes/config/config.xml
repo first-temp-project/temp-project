@@ -9,10 +9,10 @@
 	</settings>
 	
 	<typeAliases>
-		<typeAlias type="com.example.spring83.domain.dto.UserDto" alias="userDto"/>
-		<typeAlias type="com.example.spring83.domain.dto.BoardDto" alias="boardDto"/>
-		<typeAlias type="com.example.spring83.domain.dto.FileDto" alias="fileDto"/>
-		<typeAlias type="com.example.spring83.domain.dto.CommentDto" alias="commentDto"/>
-		<typeAlias type="com.example.spring83.domain.dto.ItemDto" alias="itemDto"/>
+		<typeAlias type="com.example.spring95.domain.dto.UserDto" alias="userDto"/>
+		<typeAlias type="com.example.spring95.domain.dto.BoardDto" alias="boardDto"/>
+		<typeAlias type="com.example.spring95.domain.dto.FileDto" alias="fileDto"/>
+		<typeAlias type="com.example.spring95.domain.dto.CommentDto" alias="commentDto"/>
+		<typeAlias type="com.example.spring95.domain.dto.ItemDto" alias="itemDto"/>
 	</typeAliases>
 </configuration>

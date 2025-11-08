@@ -16,19 +16,11 @@ document.querySelectorAll('nav>ul>li').forEach((li, i) => {
 	});
 });
 
-
 $("form").on("submit", function(e) {
-	$form = $(this);
+	const $form = $(this);
 	if ($form.data("submit")) {
 		e.preventDefault();
 		return;
 	}
 	$form.data("submit", true);
 });
-
-
-
-
-
-
-

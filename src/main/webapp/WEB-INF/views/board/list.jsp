@@ -20,16 +20,11 @@
 	<main class="main">
 			<div class="list-container">
 					<table>
-						<c:if test="${criteria.category eq 'free'}">
-							<caption>
-								<a href="<c:url value='/board/write${criteria.params}' />">글쓰기</a>
-							</caption>
-						</c:if>
-						<c:if test="${!writable and sessionScope.isAdmin}">
-							<caption>
-								<a href="<c:url value='/board/write${criteria.params}' />">글쓰기</a>
-							</caption>
-						</c:if>
+							<c:if test="${writable}">
+								<caption>
+									<a href="<c:url value='/board/write${criteria.params}' />">글쓰기</a>
+								</caption>
+							</c:if>
 						<tr>
 							<th>게시글번호</th>
 							<th>작성자</th>

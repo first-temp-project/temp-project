@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.spring95.domain.mapper.AdminMapper">
+	
+	<update id="updateComment">
+		UPDATE tbl_comment
+		set comment_content = #{commentContent}, comment_update_date = current_timestamp
+		WHERE comment_num = #{commentNum}
+	</update>
+	
+	<delete id="deleteComment">
+		DELETE from tbl_comment
+		WHERE comment_num = #{commentNum}
+	</delete>
+	
+	<delete id="deleteBoard">
+		DELETE from tbl_board
+		WHERE board_num = #{boardNum}
+	</delete>
+	
+</mapper>
+

@@ -47,10 +47,13 @@
       </div>
 
       <div class="find-footer">
-        <a href="<c:url value='/user/login' />" class="find-btn">취소</a>
+        <a href="<c:url value='/login' />" class="find-btn">취소</a>
         <a href="" class="find-btn find-btn-right">찾기</a>
       </div>
     </div>
+    <div class="dimmed-container" role="status" aria-live="polite" aria-busy="true">
+	    <img class="dimmed" src="<c:url value='/static/images/dimmed.svg'/>" alt="loading">
+	</div>
   </main>
   <jsp:include page="/WEB-INF/views/layout/footer.jsp" />
 </body>

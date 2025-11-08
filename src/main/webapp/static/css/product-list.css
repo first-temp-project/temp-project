@@ -235,3 +235,7 @@ div.item-footer>span {
 a.category-active {
 	color: #346aff;
 }
+
+del {
+	text-decoration-line: line-through;
+}

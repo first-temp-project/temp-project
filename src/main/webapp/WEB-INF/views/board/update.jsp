@@ -17,15 +17,19 @@
     <jsp:include page="/WEB-INF/views/layout/header.jsp" />
     <main class="main">
         <form name="registerForm" class="update-form" method="post" autocomplete="off">
-            <div id="board-container" class="container" data-board-num="${board.boardNum}">
+            <div id="board-container" class="container" data-board-num="${board.boardNum}" data-board-category="${board.boardCategory}" data-board-update="true">
             	<input type="hidden" name="boardNum" value="${board.boardNum}" />
+            	<input type="hidden" name="boardRegisterDate" value="${board.boardRegisterDate}" />
+            	<input type="hidden" name="boardReadCount" value="${board.boardReadCount}" />
+            	<input type="hidden" name="boardCommentCount" value="${board.boardCommentCount}" />
+            	<input type="hidden" name="userId" value="${board.userId}" />
                 <div class="header-with-buttons">
                     <h1 class="title">
                         <input type="text" class="title-input" name="boardTitle" placeholder="제목을 입력하세요" maxlength="55" value="${board.boardTitle}"/>
                     </h1>
                     <div class="btn-group">
-                        <a href="<c:url value='/board/list${criteria.params}' />" class="btn"><i class="fa fa-bars"></i> 취소</a>
-                        <a href="#" class="btn updateBoardBtn" data-form-class="update-form"><i class="fa fa-pencil"></i> 등록</a>
+                        <a href="<c:url value='/board/detail${criteria.params}&boardNum=${board.boardNum}' />" class="btn"><i class="fa fa-bars"></i> 취소</a>
+                        <a href="#" class="btn update-board-btn" data-form-class="update-form" data-update="true"><i class="fa fa-pencil"></i> 등록</a>
                     </div>
                 </div>
 
@@ -35,7 +39,12 @@
                     <span>조회수: <c:out value="${board.boardReadCount}" /></span>
                     <span>댓글: <c:out value="${board.boardCommentCount}" /></span>
                 </div>
-                 <c:if test="${sessionScope.isUserRole}">
+                <c:if test="${not empty board.boardLinkUrl}">
+	                <div class="link-url-box">
+					 	<input type="text" name="boardLinkUrl" class="board-link-input" value="${board.boardLinkUrl}" placeholder="이동 할 링크 (생략가능)"/>
+		        	</div>
+	        	</c:if>
+                <c:if test="${not empty board.boardVideoId}">
 	                <div class="video-id-box">
 				          <input type="text" name="boardVideoId" class="video-id-input" placeholder="유튜브 영상 ID (생략가능)"/>
 	        		</div>
@@ -47,8 +56,8 @@
                     <div class="board-content-line"></div>
                 </article>
                 <input type="file" name="multipartFiles" multiple data-update="update"/>
-	            <div class="thumbnailDiv">
-		            <ul class="thumbnailUl"></ul>
+	            <div class="thumbnail-div">
+		            <ul class="thumbnail-ul"></ul>
 		        </div>   
             </div>   
         </form>
@@ -64,8 +73,8 @@
     let sessionUserNum = '${sessionScope.userNum}';
 </script>
 <script src="<c:url value='/static/js/script.js' />"></script>
-<script src="<c:url value='/static/js/file.js' />"></script>
-<script src="<c:url value='/static/js/board.js' />"></script>
+<script type="module" src="<c:url value='/static/js/file.js' />"></script>
+<script type="module" src="<c:url value='/static/js/board.js' />"></script>
 <script>
     
 </script>
